@@ -27,14 +27,8 @@ def gather_weather_data():
     'flow': usga_station.find('td', class_='highlight2').contents[0],
     'ts': datetime.now().strftime('%m-%d-%Y  %X')
     }
-
-
     pprint(weather_vars)
 
-    return weather_vars
-
-def bot_speak(**context):
-    weather_vars = context['task_instance'].xcom_pull(task_ids='gather_weather_data')
     config_file = os.path.join(os.environ['HOME'], '.databases.conf')
     creds = configparser.ConfigParser()
     creds.read(config_file)    
@@ -85,13 +79,3 @@ scrap_vars = PythonOperator(
     python_callable=gather_weather_data,
     dag=dag
     )
-
-post_message = PythonOperator(
-    task_id='bot_speak',
-    python_callable=bot_speak,
-    provide_context=True,
-    dag=dag
-    )
-
-
-scrap_vars.set_downstream(post_message)

@@ -76,7 +76,7 @@ dag = airflow.models.DAG(
     dag_id='weather_bot',
     schedule_interval='0 9 * * *',
     catchup=False,
-    max_active_runs=1
+    max_active_runs=1,
     default_args=default_args)
 
 

@@ -34,7 +34,7 @@ RUN apt-get update -yqq\
    && apt-get clean \
    && mkdir /root/home/airflow -p \
    && apt-get install libpq-dev -y\
-   && pip install apache-airflow[crypto,postgres,jdbc,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION}
+   && pip install apache-airflow[crypto,postgres,jdbc,password,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION}
 
 
 COPY requirements.txt /root/requirements.txt

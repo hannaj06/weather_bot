@@ -34,7 +34,7 @@ def gather_weather_data():
     return weather_vars
 
 def bot_speak(**context):
-    weather_vars = = context['task_instance'].xcom_pull(task_ids='gather_weather_data')
+    weather_vars = context['task_instance'].xcom_pull(task_ids='gather_weather_data')
     config_file = os.path.join(os.environ['HOME'], '.databases.conf')
     creds = configparser.ConfigParser()
     creds.read(config_file)    
@@ -76,7 +76,8 @@ dag = airflow.models.DAG(
     dag_id='weather_bot',
     schedule_interval='0 9 * * *',
     catchup=False,
-    max_active_runs=1)
+    max_active_runs=1
+    default_args=default_args)
 
 
 scrap_vars = PythonOperator(

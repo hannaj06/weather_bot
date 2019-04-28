@@ -92,3 +92,6 @@ post_message = PythonOperator(
     provide_context=True,
     dag=dag
     )
+
+
+scrap_vars.set_downstream(post_message)

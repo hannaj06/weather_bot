@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 from pprint import pprint
 from datetime import datetime
+from airflow.operators.python_operator import PythonOperator
 import requests
 import configparser
 import os
+import airflow
 
 
 def gather_weather_data():
@@ -31,7 +33,8 @@ def gather_weather_data():
 
     return weather_vars
 
-def bot_speak(weather_vars):
+def bot_speak(**context):
+    weather_vars = = context['task_instance'].xcom_pull(task_ids='gather_weather_data')
     config_file = os.path.join(os.environ['HOME'], '.databases.conf')
     creds = configparser.ConfigParser()
     creds.read(config_file)    
@@ -61,3 +64,30 @@ Water Temp: {water_temp} F
     r = requests.post(url, params=payload)
 
     pprint(r)
+
+
+default_args = {
+    'owner': 'joe',
+    'start_date': airflow.utils.dates.days_ago(2)
+}
+
+
+dag = airflow.models.DAG(
+    dag_id='weather_bot',
+    schedule_interval='0 9 * * *',
+    catchup=False,
+    max_active_runs=1)
+
+
+scrap_vars = PythonOperator(
+    task_id='gather_weather_data',
+    python_callable=gather_weather_data,
+    dag=dag
+    )
+
+post_message = PythonOperator(
+    task_id='bot_speak',
+    python_callable=bot_speak,
+    provide_context=True,
+    dag=dag
+    )

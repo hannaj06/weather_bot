@@ -78,4 +78,3 @@ scrap_vars = PythonOperator(
     dag=dag
     )
 
-gather_weather_data()

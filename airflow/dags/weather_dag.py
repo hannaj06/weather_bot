@@ -22,7 +22,7 @@ def gather_weather_data():
     'temp': mit_station.find('a', class_='popup', href='dayouttemphilo.png').contents[0],
     'humidity': mit_station.find('a', class_='popup', href='dayouthum.png').contents[0],
     'wind': mit_station.find('a', class_='popup', href='daywind.png').contents[0],
-    'wind_dir': mit_station.find_all('a', class_='popup', href='dayouttemphilo.png'),
+    'wind_dir': mit_station.find('a', class_='popup', href='daywinddir.png').contents[0],
     'water_temp': mit_station.find('a', class_='popup', href='daywatertemphilo.png').contents[0],
     'flow': usga_station.find('td', class_='highlight2').contents[0],
     'ts': datetime.now().strftime('%m-%d-%Y  %X')
@@ -34,15 +34,13 @@ def gather_weather_data():
     creds.read(config_file)    
     bot_id = creds.get('groupme', 'weather_bot')
 
-
-
     speak = '''
 Weather Bot 
 {ts}
 -----------------------
 Temp: {temp} F
 Humidity: {humidity}%
-Wind: {wind} MPH
+Wind: {wind} MPH {wind_dir}
 Flow: {flow} ft^3/s
 Water Temp: {water_temp} F
     '''.format(**weather_vars)
@@ -79,3 +77,5 @@ scrap_vars = PythonOperator(
     python_callable=gather_weather_data,
     dag=dag
     )
+
+gather_weather_data()

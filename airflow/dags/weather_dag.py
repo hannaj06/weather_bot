@@ -100,7 +100,7 @@ dag = airflow.models.DAG(
 
 
 image_dl = PythonOperator(
-    task_id='download basin image',
+    task_id='download_basin_image',
     python_callable=fetch_basin_image,
     dag=dag
     )

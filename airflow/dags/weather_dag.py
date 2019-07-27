@@ -80,7 +80,7 @@ Water Temp: {water_temp} F
 
     if image_url is not None:    
         payload['text'] = image_url
-        r_image = requests.poast(url, params=payload)
+        r_image = requests.post(url, params=payload)
         pprint(r_image)
 
     

@@ -8,6 +8,14 @@ import os
 import airflow
 
 
+def fetch_basin_image():
+    SE_feed = 'http://sailing.mit.edu/img/SE/latest.jpg'
+    r = requests.get(SE_feed)
+
+    with open('basin_feed.jpg', 'wb') as fl:
+        fl.write(r.content)
+
+
 def gather_weather_data():
     mit_r = requests.get('http://sailing.mit.edu/weather')
     usga_r = requests.get('https://waterdata.usgs.gov/nwis/uv?site_no=01104500')
@@ -29,10 +37,24 @@ def gather_weather_data():
     }
     pprint(weather_vars)
 
+    #gather creds
     config_file = os.path.join(os.environ['HOME'], '.databases.conf')
     creds = configparser.ConfigParser()
     creds.read(config_file)    
     bot_id = creds.get('groupme', 'weather_bot')
+    access_token = creds.get('groupme', 'access_token')
+
+
+    #post basin image
+    with open('basin_feed.jpg', 'rb') as fl:
+        image_req = requests.post(
+            'https://image.groupme.com/pictures', 
+            data=fl.read(),
+            headers={'Content-Type': 'image/jpeg',
+                    'X-Access-Token': access_token})
+
+        image_url = image_req.json().get('payload').get('picture_url')
+
 
     speak = '''
 Weather Bot 
@@ -53,10 +75,15 @@ Water Temp: {water_temp} F
     }
 
     url = 'https://api.groupme.com/v3/bots/post'
-    r = requests.post(url, params=payload)
+    r_text = requests.post(url, params=payload)
+    pprint(r_text)
 
-    pprint(r)
+    if image_url is not None:    
+        payload['text'] = image_url
+        r_image = requests.poast(url, params=payload)
+        pprint(r_image)
 
+    
 
 default_args = {
     'owner': 'joe',
@@ -72,9 +99,17 @@ dag = airflow.models.DAG(
     default_args=default_args)
 
 
+image_dl = PythonOperator(
+    task_id='download basin image',
+    python_callable=fetch_basin_image,
+    dag=dag
+    )
+
 scrap_vars = PythonOperator(
     task_id='gather_weather_data',
     python_callable=gather_weather_data,
     dag=dag
     )
 
+
+image_dl.set_downstream(scrap_vars)
